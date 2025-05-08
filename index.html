@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulación Señal - Calculadora de Parámetros</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div class="max-w-4xl mx-auto mt-10 bg-white rounded-2xl shadow-lg p-8">
+    <h1 class="text-3xl font-bold text-center mb-6">Calculadora de Parámetros de Simulación</h1>
+    <div class="flex flex-col md:flex-row md:space-x-8">
+      <!-- Formulario -->
+      <form id="simForm" class="flex-1 space-y-4">
+        <div>
+          <label for="frequency" class="block text-sm font-medium mb-1">Frecuencia (Hz):</label>
+          <input
+            type="number"
+            id="frequency"
+            value="60"
+            step="any"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label for="cycles" class="block text-sm font-medium mb-1">Ciclos a visualizar:</label>
+          <input
+            type="number"
+            id="cycles"
+            value="5"
+            min="1"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <button
+          type="submit"
+          class="w-full py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition"
+        >
+          Calcular
+        </button>
+      </form>
+
+      <!-- Resultados -->
+      <div id="results" class="flex-1 mt-8 md:mt-0 bg-gray-50 rounded-lg p-6 hidden">
+        <h2 class="text-2xl font-semibold mb-4">Resultados</h2>
+        <p class="text-lg"><span class="font-medium">Time step:</span> <span id="timeStep"></span> <span class="unit">µs</span></p>
+        <p class="text-lg"><span class="font-medium">Final time:</span> <span id="finalTime"></span> <span class="unit">ms</span></p>
+        <p class="text-lg"><span class="font-medium">Initial time:</span> <span id="initialTime"></span> <span class="unit">s</span></p>
+        <p class="text-lg"><span class="font-medium">Max time step:</span> <span id="maxTimeStep"></span> <span class="unit">µs</span></p>
+
+        <div class="mt-4">
+          <label class="block text-sm font-medium mb-1">Directiva SPICE:</label>
+          <div class="flex items-center space-x-2">
+            <input
+              type="text"
+              id="spiceDirective"
+              readonly
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-md bg-gray-100"
+            />
+            <button
+              id="copyBtn"
+              class="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"
+            >
+              Copiar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('simForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const f = parseFloat(document.getElementById('frequency').value);
+      const N = parseFloat(document.getElementById('cycles').value);
+      if (f <= 0 || N <= 0) {
+        alert('La frecuencia y los ciclos deben ser mayores que cero.');
+        return;
+      }
+      // Cálculos
+      const T = 1 / f;               // s
+      const t_stop = N * T;          // s
+      const P = 100;                 // puntos por ciclo
+      const dt = T / P;              // s
+      const dt_us = dt * 1e6;        // µs
+      const t_stop_ms = t_stop * 1e3;// ms
+
+      // Mostrar valores
+      document.getElementById('timeStep').textContent = dt_us.toFixed(2);
+      document.getElementById('finalTime').textContent = t_stop_ms.toFixed(2);
+      document.getElementById('initialTime').textContent = '0';
+      document.getElementById('maxTimeStep').textContent = dt_us.toFixed(2);
+
+      // Generar directiva SPICE
+      const directive = `.tran ${dt_us.toFixed(2)}u ${t_stop_ms.toFixed(2)}m 0 ${dt_us.toFixed(2)}u`;
+      const inputDir = document.getElementById('spiceDirective');
+      inputDir.value = directive;
+
+      document.getElementById('results').classList.remove('hidden');
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', function() {
+      const input = document.getElementById('spiceDirective');
+      input.select();
+      document.execCommand('copy');
+      this.textContent = '¡Copiado!';
+      setTimeout(() => this.textContent = 'Copiar', 2000);
+    });
+  </script>
+</body>
+</html>
