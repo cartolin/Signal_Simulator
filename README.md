@@ -1,9 +1,10 @@
 # Calculadora de Parámetros de Simulación KiCad
 
 Este proyecto provee los parámetros esenciales para configurar un análisis transitorio en KiCad o otros programas de simulación de circuitos, basándose en:
-
 * **Frecuencia** de la señal (Hz)
 * **Número de ciclos** a visualizar
+---
+Probar en: [Signal_Simulator](https://cartolin.github.io/Signal_Simulator/)
 
 ---
 
